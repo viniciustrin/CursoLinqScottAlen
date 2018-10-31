@@ -10,6 +10,7 @@ namespace Cars
         static void Main(string[] args)
         {
             var cars = ProcessFile("fuel.csv");
+            var manufacturers = ProcessManufacturers("manufacturers.csv");
             //foreach (var car in cars)
             //{
             //    Console.WriteLine(car.Name);
@@ -31,6 +32,24 @@ namespace Cars
             var a = new { nome = "asd" };
             
 
+        }
+
+        private static object ProcessManufacturers(string v)
+        {
+            var query =
+                File.ReadAllLines(v)
+                .Where(l => l.Length > 1)
+                .Select(l =>
+                {
+                    var columns = l.Split(',');
+                    return new Manufacturer
+                    {
+                        Name = columns[0],
+                        Headquarters = columns[1],
+                        Year = int.Parse(columns[2])
+                    };
+                });
+            return query.ToList();
         }
 
         private static List<Car> ProcessFile(string path)
