@@ -16,25 +16,158 @@ namespace Cars
             //    Console.WriteLine(car.Name);
             //}
 
-            // ordenando
+            //// ordenando
             //var query = cars.Where(c => c.Manufacturer == "BMW" && c.Year == 2016).OrderByDescending(c => c.Combined).ThenBy(c => c.Name);
-            //query syntax
-            var query = from car in cars
-                        where car.Manufacturer == "BMW" & car.Year == 2016
-                        orderby car.Combined descending, car.Name
-                        select car;
 
-            foreach (var car in query.Take(10))
+            ////query syntax
+            //var query = from car in cars
+            //            where car.Manufacturer == "BMW" & car.Year == 2016
+            //            orderby car.Combined descending, car.Name
+            //            select car;
+
+            //foreach (var car in query.Take(10))
+            //{
+            //    Console.WriteLine($"{car.Manufacturer} {car.Name} : {car.Combined}");
+            //}
+
+            ////objeto anonimo
+            //var a = new { nome = "asd" };
+
+
+            ////join com query syntax
+            //var query =
+            //    from car in cars
+            //    join manufacturer in manufacturers on car.Manufacturer equals manufacturer.Name
+            //    orderby car.Combined descending, car.Name ascending
+            //    select new
+            //    {
+            //        manufacturer.Headquarters,
+            //        car.Name,
+            //        car.Combined
+            //    };
+
+            ////join com mehtod syntax
+            //var query =
+            //    cars.Join(manufacturers,
+            //            c => c.Manufacturer,
+            //            m => m.Name,
+            //            (c, m) =>
+            //            new
+            //            {
+            //                m.Headquarters,   //pode usar o objeto inteiro aqui tbm
+            //                c.Name,           // car = c,
+            //                c.Combined        // manufacturer = m e depois tem q fazer projeçao com select()
+            //            }).OrderByDescending(c => c.Combined)
+            //            .ThenBy(c => c.Name);
+
+
+            ////join com chave composta com query syntax
+            //var query =
+            //    from car in cars
+            //    join manufacturer in manufacturers 
+            //    on new { car.Manufacturer, car.Year }
+            //    equals
+            //    new {Manufacturer = manufacturer.Name, manufacturer.Year}
+            //    orderby car.Combined descending, car.Name ascending
+            //    select new
+            //    {
+            //        manufacturer.Headquarters,
+            //        car.Name,
+            //        car.Combined
+            //    };
+
+            ////join com chave composta mehtod syntax
+            //var query =
+            //    cars.Join(manufacturers,
+            //            c => new { c.Manufacturer, c.Year },
+            //            m => new { Manufacturer = m.Name, m.Year },
+            //            (c, m) =>
+            //            new
+            //            {
+            //                m.Headquarters,   //pode usar o objeto inteiro aqui tbm
+            //                c.Name,           // car = c,
+            //                c.Combined        // manufacturer = m e depois tem q fazer projeçao com select()
+            //            }).OrderByDescending(c => c.Combined)
+            //            .ThenBy(c => c.Name);
+            //foreach (var car in query.Take(10))
+            //{
+            //    Console.WriteLine($"{car.Headquarters} {car.Name} : {car.Combined}");
+            //}
+
+            //// group by 
+            //var query =
+            //    from car in cars
+            //    group car by car.Manufacturer.ToUpper()
+            //    into m
+            //    orderby m.Key
+            //    select m;
+
+            //var query =
+            //    cars.GroupBy(c => c.Manufacturer.ToUpper())
+            //    .OrderBy(g => g.Key);
+
+
+            //foreach (var group in query)
+            //{
+            //    Console.WriteLine(group.Key);
+            //    foreach (var car in group.OrderByDescending(c => c.Combined).Take(2))
+            //    {
+            //        Console.WriteLine($"\t{car.Name} : {car.Combined}");
+            //    }
+            //}
+
+
+            /////groupby com join
+            //var query =
+            //    from manu in manufacturers
+            //    join car in cars on manu.Name equals car.Manufacturer
+            //    into carGroup
+            //    select new
+            //    {
+            //        Manufacturer = manu,
+            //        Cars = carGroup
+            //    };
+
+            //var query =
+            //    manufacturers.GroupJoin(cars,
+            //    m => m.Name, c => c.Manufacturer,
+            //    (m, g) => new
+            //    {
+            //        Manufacturer = m,
+            //        Cars = g
+            //    }).OrderBy(m => m.Manufacturer.Name);
+
+            //foreach (var group in query)
+            //{
+            //    Console.WriteLine($"{group.Manufacturer.Name} : {group.Manufacturer.Headquarters}");
+            //    foreach (var car in group.Cars.OrderByDescending(c => c.Combined).Take(2))
+            //    {
+            //        Console.WriteLine($"\t{car.Name} : {car.Combined}");
+            //    }
+            //}
+
+            var query =
+                cars.Join(manufacturers, c => c.Manufacturer, m => m.Name, (c, m) => new
+                {
+                    c.Name,
+                    c.Combined,
+                    m.Headquarters
+                }).GroupBy(g => g.Headquarters);
+
+            foreach (var group in query)
             {
-                Console.WriteLine($"{car.Manufacturer} {car.Name} : {car.Combined}");
+                Console.WriteLine(group.Key);
+                foreach (var car in group.OrderByDescending(c => c.Combined).Take(2))
+                {
+                    Console.WriteLine($"\t{car.Name} : {car.Combined}");
+                }
             }
 
-            var a = new { nome = "asd" };
-            
+
 
         }
 
-        private static object ProcessManufacturers(string v)
+        private static List<Manufacturer> ProcessManufacturers(string v)
         {
             var query =
                 File.ReadAllLines(v)
